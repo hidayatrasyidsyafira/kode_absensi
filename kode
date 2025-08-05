@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi - Login & Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .login-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .login-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .v57-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        .v57-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            transition: all 0.3s ease;
+        }
+        .v57-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        .v57-header {
+            background: linear-gradient(90deg, #2196F3, #21CBF3);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container flex items-center justify-center p-4">
+        <div class="login-form rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">SISTEM ABSENSI</h1>
+                <p class="text-gray-600">Digital Attendance System</p>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan username">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan password">
+                </div>
+
+                <button onclick="doLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    🚀 LOGIN KE SISTEM
+                </button>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold text-gray-800 mb-3">📊 Google Spreadsheet Integration</h3>
+                
+                <div class="space-y-3">
+                    <!-- Connection Status -->
+                    <div id="connectionStatus" class="p-3 rounded-lg border-l-4">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">Status Koneksi:</span>
+                            <span id="statusIndicator" class="text-sm">🔄 Checking...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuration Info -->
+                    <div class="bg-blue-50 p-3 rounded-lg text-sm">
+                        <p class="font-medium text-blue-800 mb-2">⚙️ Konfigurasi Spreadsheet:</p>
+                        <p class="text-xs text-blue-700">• Sheet 'user_baru': tanggal, nama_lengkap, username, password, photo, email</p>
+                        <p class="text-xs text-blue-700">• Sistem akan otomatis memuat data user saat startup</p>
+                        <p class="text-xs text-blue-700">• Cache data berlaku 10 menit untuk performa optimal</p>
+                    </div>
+                    
+                    <!-- Demo Accounts -->
+                    <div class="bg-yellow-50 p-3 rounded-lg">
+                        <p class="font-medium text-yellow-800 mb-2">👤 Akun Demo (Fallback):</p>
+                        <div class="text-sm text-yellow-700 space-y-1">
+                            <p><strong>admin</strong> / admin123 (Administrator)</p>
+                            <p><strong>user</strong> / user123 (Employee)</p>
+                            <p><strong>karyawan</strong> / pass123 (Staff)</p>
+                            <p><strong>manager</strong> / manager123 (Manager)</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Setup Instructions -->
+                    <div class="bg-purple-50 p-3 rounded-lg text-xs">
+                        <p class="font-medium text-purple-800 mb-2">🔧 Setup Google Apps Script:</p>
+                        <p class="text-purple-700">1. Buka script.google.com → Buat project baru</p>
+                        <p class="text-purple-700">2. Ganti kode default dengan function doGet() yang diberikan</p>
+                        <p class="text-purple-700">3. Ganti 'YOUR_SPREADSHEET_ID' dengan ID spreadsheet Anda</p>
+                        <p class="text-purple-700">4. Deploy → New deployment → Web app</p>
+                        <p class="text-purple-700">5. Execute as: Me, Access: Anyone → Deploy</p>
+                        <p class="text-purple-700">6. Copy URL deployment ke SPREADSHEET_CONFIG.WEB_APP_URL</p>
+                        <p class="text-purple-700 mt-2 font-medium">⚠️ JANGAN gabungkan dengan kode HTML ini!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="hidden">
+        <!-- Header -->
+        <header class="v57-header text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">SISTEM ABSENSI</h1>
+                            <p class="text-sm opacity-90">Dashboard Terintegrasi</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-semibold" id="currentDateTime">Loading...</div>
+                        <div class="text-sm opacity-90">Server Time</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-gray-100 min-h-screen">
+            <div class="container mx-auto px-4 py-8">
+                <!-- User Info Card -->
+                <div class="v57-card rounded-xl p-6 mb-8 text-white animate-fadeInUp">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold" id="employeeName">LOADING...</h2>
+                                <p class="opacity-90" id="employeeInfo">Loading user info...</p>
+                                <div class="flex items-center mt-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                    <span class="text-sm" id="statusText">Ready for Check-in</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold" id="todayDate">--</div>
+                            <div class="text-sm opacity-90">Today</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Check In -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">CHECK IN</h3>
+                            <p class="text-gray-600 mb-4">Mulai aktivitas kerja hari ini</p>
+                            <div class="text-2xl font-bold text-gray-800 mb-4" id="checkInTime">--:--:--</div>
+                            <button onclick="performCheckIn()" id="checkInBtn" class="v57-button text-white px-8 py-3 rounded-lg font-semibold w-full">
+                                🕐 CHECK IN SEKARANG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Check Out -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">CHECK OUT</h3>
+                            <p class="text-gray-600 mb-4">Akhiri aktivitas kerja hari ini</p>
+                            <div class="text-2xl font-bold text-gray-800 mb-4" id="checkOutTime">--:--:--</div>
+                            <button onclick="performCheckOut()" id="checkOutBtn" class="bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed" disabled>
+                                🕐 CHECK OUT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today Summary -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fadeInUp">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">📊 RINGKASAN HARI INI</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600" id="workingHours">0h 0m</div>
+                            <div class="text-sm text-gray-600">Jam Kerja</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600" id="attendanceStatus">Belum Absen</div>
+                            <div class="text-sm text-gray-600">Status</div>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-600" id="breakTime">0m</div>
+                            <div class="text-sm text-gray-600">Istirahat</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600" id="overtime">0h</div>
+                            <div class="text-sm text-gray-600">Lembur</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Menu -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <button onclick="viewHistory()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <div class="text-sm font-semibold text-gray-800">Riwayat</div>
+                        </div>
+                    </button>
+
+                    <button onclick="requestPermission()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-sm font-semibold text-gray-800">Izin</div>
+                        </div>
+                    </button>
+
+                    <button onclick="viewReport()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-sm font-semibold text-gray-800">Laporan</div>
+                        </div>
+                    </button>
+
+                    <button onclick="logout()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                            </div>
+                            <div class="text-sm font-semibold text-gray-800">Keluar</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📋 AKTIVITAS TERBARU</h3>
+                    <div id="activityList" class="space-y-3">
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-600">Belum ada aktivitas hari ini</div>
+                                <div class="text-xs text-gray-400">Silakan lakukan check-in untuk memulai</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentUser = null;
+        let isCheckedIn = false;
+        let checkInTimestamp = null;
+        let workTimer = null;
+
+        // Google Spreadsheet Configuration
+        const SPREADSHEET_CONFIG = {
+            // URL Google Apps Script Web App Anda
+            WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxha5KdJdCiZMYJwAu4AaSSrb7Jb9UADQcByleFWOlp4wHHFqv2U77ViaqDKMheIWKW/exec',
+            
+            // Status koneksi
+            STATUS: 'CONNECTED'
+        };
+
+        // Cache untuk data user dari spreadsheet
+        let spreadsheetUsers = null;
+        let cacheExpiry = null;
+
+        // Demo accounts sebagai fallback
+        const DEMO_ACCOUNTS = {
+            'admin': {
+                password: 'admin123',
+                name: 'ADMIN SYSTEM',
+                email: 'admin@company.com',
+                department: 'IT',
+                role: 'Administrator',
+                employeeId: 'ADM001'
+            },
+            'user': {
+                password: 'user123',
+                name: 'USER DEMO',
+                email: 'user@company.com',
+                department: 'General',
+                role: 'Employee',
+                employeeId: 'USR001'
+            },
+            'karyawan': {
+                password: 'pass123',
+                name: 'KARYAWAN DEMO',
+                email: 'karyawan@company.com',
+                department: 'Operations',
+                role: 'Staff',
+                employeeId: 'KRY001'
+            },
+            'manager': {
+                password: 'manager123',
+                name: 'MANAGER DEMO',
+                email: 'manager@company.com',
+                department: 'Management',
+                role: 'Manager',
+                employeeId: 'MGR001'
+            }
+        };
+
+        // Initialize system when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('System initializing...');
+            checkLoginStatus();
+            
+            // Load users from spreadsheet and update status
+            loadUsersFromSpreadsheet().then(() => {
+                updateStatusAfterLoad();
+            }).catch(() => {
+                updateStatusAfterLoad();
+            });
+            
+            // Add Enter key support for login
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    doLogin();
+                }
+            });
+            
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    doLogin();
+                }
+            });
+        });
+
+        // Load users from Google Spreadsheet
+        async function loadUsersFromSpreadsheet() {
+            try {
+                // Check cache first (valid for 10 minutes)
+                const now = new Date().getTime();
+                if (spreadsheetUsers && cacheExpiry && now < cacheExpiry) {
+                    console.log('✅ Using cached user data');
+                    return spreadsheetUsers;
+                }
+
+                console.log('🔄 Loading users from Google Spreadsheet...');
+                
+                // Show loading indicator
+                showLoadingToast('🔄 Memuat data user dari spreadsheet...');
+
+                const response = await fetch(SPREADSHEET_CONFIG.WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const responseText = await response.text();
+                console.log('📄 Response received:', responseText.substring(0, 200) + '...');
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('❌ JSON parse error:', parseError);
+                    throw new Error('Invalid JSON response from Google Apps Script');
+                }
+
+                console.log('📊 Parsed data:', data);
+
+                // Process the data based on your spreadsheet structure
+                if (data && (data.success || Array.isArray(data) || data.users || data.data)) {
+                    let users = null;
+                    
+                    // Handle different response formats
+                    if (data.users) {
+                        users = data.users;
+                    } else if (data.data) {
+                        users = data.data;
+                    } else if (Array.isArray(data)) {
+                        users = data;
+                    } else if (data.success && data.result) {
+                        users = data.result;
+                    }
+
+                    if (users && Array.isArray(users) && users.length > 0) {
+                        // Convert array data to user object
+                        spreadsheetUsers = {};
+                        
+                        users.forEach((user, index) => {
+                            console.log(`👤 Processing user ${index}:`, user);
+                            
+                            let username, password, nama, email;
+                            
+                            if (Array.isArray(user)) {
+                                // If user is an array (row data)
+                                // Assuming structure: [tanggal, nama_lengkap, username, password, photo, email]
+                                username = user[2];
+                                password = user[3];
+                                nama = user[1];
+                                email = user[5];
+                            } else if (typeof user === 'object') {
+                                // If user is an object
+                                username = user.username || user.Username;
+                                password = user.password || user.Password;
+                                nama = user.nama_lengkap || user.nama || user.name || user.Name;
+                                email = user.email || user.Email || '';
+                            }
+                            
+                            if (username && password) {
+                                spreadsheetUsers[username] = {
+                                    password: password,
+                                    name: (nama || username).toString().toUpperCase(),
+                                    email: email || '',
+                                    department: 'General',
+                                    role: 'Employee',
+                                    employeeId: username.toString().toUpperCase(),
+                                    source: 'spreadsheet'
+                                };
+                            }
+                        });
+                        
+                        // Set cache expiry (10 minutes)
+                        cacheExpiry = now + (10 * 60 * 1000);
+                        
+                        hideLoadingToast();
+                        showSuccessToast(`✅ Berhasil memuat ${Object.keys(spreadsheetUsers).length} user dari spreadsheet`);
+                        
+                        console.log('✅ Users loaded from spreadsheet:', Object.keys(spreadsheetUsers));
+                        return spreadsheetUsers;
+                    } else {
+                        throw new Error('No valid users found in spreadsheet data');
+                    }
+                } else {
+                    throw new Error('Invalid data structure from Google Apps Script');
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading users from spreadsheet:', error);
+                hideLoadingToast();
+                
+                // Show error notification
+                showWarningToast(`⚠️ Gagal memuat dari spreadsheet: ${error.message}`);
+                
+                // Use demo accounts as fallback
+                spreadsheetUsers = null;
+                console.log('📋 Using demo accounts as fallback');
+                
+                return null;
+            }
+        }
+
+        // Helper functions for toast notifications
+        function showLoadingToast(message) {
+            removeExistingToasts();
+            const toast = document.createElement('div');
+            toast.id = 'loadingToast';
+            toast.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
+            toast.innerHTML = `
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
+                ${message}
+            `;
+            document.body.appendChild(toast);
+        }
+
+        function showSuccessToast(message) {
+            removeExistingToasts();
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function showWarningToast(message) {
+            removeExistingToasts();
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-yellow-500 text-white px-4 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function hideLoadingToast() {
+            const loadingToast = document.getElementById('loadingToast');
+            if (loadingToast) {
+                loadingToast.remove();
+            }
+        }
+
+        function removeExistingToasts() {
+            const existingToasts = document.querySelectorAll('.fixed.top-4.right-4');
+            existingToasts.forEach(toast => toast.remove());
+        }
+
+        // Update connection status on login screen
+        function updateConnectionStatus() {
+            const statusDiv = document.getElementById('connectionStatus');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            if (!statusDiv || !statusIndicator) return;
+            
+            if (spreadsheetUsers && Object.keys(spreadsheetUsers).length > 0) {
+                // Connected to spreadsheet
+                statusDiv.className = 'p-3 rounded-lg border-l-4 border-green-400 bg-green-50';
+                statusIndicator.innerHTML = `✅ Terhubung (${Object.keys(spreadsheetUsers).length} users)`;
+            } else {
+                // Using demo accounts
+                statusDiv.className = 'p-3 rounded-lg border-l-4 border-yellow-400 bg-yellow-50';
+                statusIndicator.innerHTML = '⚠️ Menggunakan akun demo';
+            }
+        }
+
+        // Update status when data loads
+        function updateStatusAfterLoad() {
+            setTimeout(updateConnectionStatus, 1000);
+        }
+
+        // Enhanced login function with spreadsheet support
+        async function doLogin() {
+            console.log('doLogin function called');
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            console.log('Username:', username, 'Password length:', password.length);
+            
+            // Validate input
+            if (!username || !password) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Input Kosong!',
+                    text: 'Username dan password harus diisi!',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            // Show loading
+            Swal.fire({
+                title: '🔐 Memproses Login...',
+                text: 'Memeriksa kredensial...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // First, try to load fresh data from spreadsheet if needed
+                if (!spreadsheetUsers) {
+                    console.log('🔄 Loading users from spreadsheet for login...');
+                    await loadUsersFromSpreadsheet();
+                }
+
+                let userFound = false;
+                let userAccount = null;
+                let loginSource = '';
+
+                // Check spreadsheet users first (priority)
+                if (spreadsheetUsers && spreadsheetUsers[username] && spreadsheetUsers[username].password === password) {
+                    console.log('✅ Login successful with spreadsheet account');
+                    userAccount = spreadsheetUsers[username];
+                    loginSource = 'Google Spreadsheet';
+                    userFound = true;
+                } 
+                // Fallback to demo accounts
+                else if (DEMO_ACCOUNTS[username] && DEMO_ACCOUNTS[username].password === password) {
+                    console.log('✅ Login successful with demo account');
+                    userAccount = DEMO_ACCOUNTS[username];
+                    loginSource = 'Demo Account';
+                    userFound = true;
+                }
+
+                if (userFound && userAccount) {
+                    // Set current user
+                    currentUser = {
+                        username: username,
+                        ...userAccount,
+                        loginSource: loginSource,
+                        loginTime: new Date().toISOString()
+                    };
+                    
+                    // Save to localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Close loading and show success
+                    Swal.close();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Login Berhasil!',
+                        html: `
+                            <div class="text-center">
+                                <p class="mb-2">Selamat datang, <strong>${currentUser.name}</strong>!</p>
+                                <div class="text-sm text-gray-600">
+                                    <p>📊 Sumber: ${loginSource}</p>
+                                    <p>🕐 ${new Date().toLocaleString('id-ID')}</p>
+                                </div>
+                            </div>
+                        `,
+                        timer: 3000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        showDashboard();
+                    });
+                    
+                } else {
+                    console.log('❌ Login failed - invalid credentials');
+                    
+                    // Prepare available accounts list
+                    let availableAccounts = [];
+                    
+                    // Add spreadsheet accounts
+                    if (spreadsheetUsers && Object.keys(spreadsheetUsers).length > 0) {
+                        availableAccounts.push('<p class="font-semibold text-green-800 mb-2">📊 Akun dari Google Spreadsheet:</p>');
+                        Object.keys(spreadsheetUsers).forEach(user => {
+                            availableAccounts.push(`<p class="text-sm">• <strong>${user}</strong> (${spreadsheetUsers[user].name})</p>`);
+                        });
+                        availableAccounts.push('<br>');
+                    }
+                    
+                    // Add demo accounts
+                    availableAccounts.push('<p class="font-semibold text-blue-800 mb-2">👤 Akun Demo:</p>');
+                    Object.keys(DEMO_ACCOUNTS).forEach(user => {
+                        availableAccounts.push(`<p class="text-sm">• <strong>${user}</strong> / ${DEMO_ACCOUNTS[user].password}</p>`);
+                    });
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Login Gagal!',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-4">Username atau password salah!</p>
+                                <div class="bg-gray-50 p-3 rounded-lg max-h-60 overflow-y-auto">
+                                    ${availableAccounts.join('')}
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <button onclick="refreshSpreadsheetData()" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
+                                        🔄 Refresh Data Spreadsheet
+                                    </button>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonColor: '#3b82f6',
+                        width: '500px'
+                    });
+                }
+
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error Login!',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-4">Terjadi kesalahan saat login:</p>
+                            <div class="bg-red-50 p-3 rounded-lg text-sm">
+                                <p><strong>Error:</strong> ${error.message}</p>
+                            </div>
+                            <div class="mt-4 bg-blue-50 p-3 rounded-lg">
+                                <p class="font-semibold text-blue-800 mb-2">👤 Gunakan Akun Demo:</p>
+                                <div class="text-sm space-y-1">
+                                    <p><strong>admin</strong> / admin123</p>
+                                    <p><strong>user</strong> / user123</p>
+                                    <p><strong>karyawan</strong> / pass123</p>
+                                    <p><strong>manager</strong> / manager123</p>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonColor: '#3b82f6'
+                });
+            }
+        }
+
+        // Function to refresh spreadsheet data
+        async function refreshSpreadsheetData() {
+            Swal.fire({
+                title: '🔄 Memuat Ulang Data...',
+                text: 'Mengambil data terbaru dari spreadsheet',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Clear cache to force reload
+            spreadsheetUsers = null;
+            cacheExpiry = null;
+
+            try {
+                await loadUsersFromSpreadsheet();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Data Berhasil Dimuat!',
+                    text: spreadsheetUsers ? 
+                        `Berhasil memuat ${Object.keys(spreadsheetUsers).length} user dari spreadsheet` : 
+                        'Menggunakan akun demo sebagai fallback',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+            } catch (error) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Gagal Memuat Data',
+                    text: 'Tidak dapat terhubung ke spreadsheet. Gunakan akun demo.',
+                    confirmButtonColor: '#f59e0b'
+                });
+            }
+        }
+
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboardScreen').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            
+            // Initialize dashboard
+            initializeDashboard();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            loadTodayData();
+        }
+
+        function initializeDashboard() {
+            document.getElementById('employeeName').textContent = currentUser.name;
+            document.getElementById('employeeInfo').textContent = `${currentUser.email} | ${currentUser.role} | ${currentUser.department}`;
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options);
+            document.getElementById('todayDate').textContent = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        }
+
+        function loadTodayData() {
+            const today = new Date().toDateString();
+            const savedData = localStorage.getItem(`attendance_${currentUser.username}_${today}`);
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.checkIn) {
+                    isCheckedIn = true;
+                    checkInTimestamp = new Date(data.checkIn);
+                    document.getElementById('checkInTime').textContent = checkInTimestamp.toLocaleTimeString('id-ID');
+                    document.getElementById('attendanceStatus').textContent = 'Sudah Check-in';
+                    document.getElementById('statusText').textContent = 'Working - Ready for Check-out';
+                    
+                    // Enable check out button
+                    const checkOutBtn = document.getElementById('checkOutBtn');
+                    checkOutBtn.disabled = false;
+                    checkOutBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold w-full transition-all';
+                    
+                    // Disable check in button
+                    const checkInBtn = document.getElementById('checkInBtn');
+                    checkInBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
+                    checkInBtn.disabled = true;
+                    
+                    startWorkTimer();
+                }
+                
+                if (data.checkOut) {
+                    document.getElementById('checkOutTime').textContent = new Date(data.checkOut).toLocaleTimeString('id-ID');
+                    document.getElementById('attendanceStatus').textContent = 'Selesai';
+                    document.getElementById('statusText').textContent = 'Work Completed';
+                    
+                    document.getElementById('checkOutBtn').disabled = true;
+                    document.getElementById('checkOutBtn').className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
+                }
+            }
+        }
+
+        function performCheckIn() {
+            if (isCheckedIn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sudah Check-in',
+                    text: 'Anda sudah melakukan check-in hari ini',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: '🕐 Konfirmasi Check-in',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-800 mb-2">Detail Check-in</h4>
+                            <p><strong>Waktu:</strong> ${new Date().toLocaleString('id-ID')}</p>
+                            <p><strong>Karyawan:</strong> ${currentUser.name}</p>
+                            <p><strong>Department:</strong> ${currentUser.department}</p>
+                            <p><strong>Status:</strong> ${new Date().getHours() <= 8 ? 'Tepat Waktu' : 'Terlambat'}</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '✅ Konfirmasi Check-in',
+                cancelButtonText: '❌ Batal',
+                confirmButtonColor: '#10b981'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const now = new Date();
+                    isCheckedIn = true;
+                    checkInTimestamp = now;
+                    
+                    // Save to localStorage
+                    const today = now.toDateString();
+                    const attendanceData = {
+                        checkIn: now.toISOString(),
+                        employee: currentUser.name,
+                        username: currentUser.username,
+                        employeeId: currentUser.employeeId,
+                        department: currentUser.department
+                    };
+                    localStorage.setItem(`attendance_${currentUser.username}_${today}`, JSON.stringify(attendanceData));
+                    
+                    // Update UI
+                    document.getElementById('checkInTime').textContent = now.toLocaleTimeString('id-ID');
+                    document.getElementById('attendanceStatus').textContent = 'Sudah Check-in';
+                    document.getElementById('statusText').textContent = 'Working - Ready for Check-out';
+                    
+                    // Enable check out button
+                    const checkOutBtn = document.getElementById('checkOutBtn');
+                    checkOutBtn.disabled = false;
+                    checkOutBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold w-full transition-all';
+                    
+                    // Disable check in button
+                    const checkInBtn = document.getElementById('checkInBtn');
+                    checkInBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
+                    checkInBtn.disabled = true;
+                    
+                    // Add activity
+                    addActivity('Check-in berhasil', now.toLocaleTimeString('id-ID'), 'green');
+                    
+                    // Start work timer
+                    startWorkTimer();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Check-in Berhasil!',
+                        text: `Selamat bekerja, ${currentUser.name}! Check-in pada ${now.toLocaleTimeString('id-ID')}`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function performCheckOut() {
+            if (!isCheckedIn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Belum Check-in',
+                    text: 'Anda harus check-in terlebih dahulu',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+
+            const now = new Date();
+            const workDuration = calculateWorkDuration(checkInTimestamp, now);
+
+            Swal.fire({
+                title: '🕐 Konfirmasi Check-out',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-red-800 mb-2">Detail Check-out</h4>
+                            <p><strong>Karyawan:</strong> ${currentUser.name}</p>
+                            <p><strong>Check-in:</strong> ${checkInTimestamp.toLocaleTimeString('id-ID')}</p>
+                            <p><strong>Check-out:</strong> ${now.toLocaleTimeString('id-ID')}</p>
+                            <p><strong>Total Kerja:</strong> ${workDuration}</p>
+                            <p><strong>Status:</strong> ${now.getHours() >= 17 ? 'Selesai' : 'Pulang Awal'}</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '✅ Konfirmasi Check-out',
+                cancelButtonText: '❌ Batal',
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Update localStorage
+                    const today = now.toDateString();
+                    const existingData = JSON.parse(localStorage.getItem(`attendance_${currentUser.username}_${today}`) || '{}');
+                    existingData.checkOut = now.toISOString();
+                    localStorage.setItem(`attendance_${currentUser.username}_${today}`, JSON.stringify(existingData));
+                    
+                    // Update UI
+                    document.getElementById('checkOutTime').textContent = now.toLocaleTimeString('id-ID');
+                    document.getElementById('workingHours').textContent = workDuration;
+                    document.getElementById('attendanceStatus').textContent = 'Selesai';
+                    document.getElementById('statusText').textContent = 'Work Completed';
+                    
+                    // Disable check out button
+                    const checkOutBtn = document.getElementById('checkOutBtn');
+                    checkOutBtn.disabled = true;
+                    checkOutBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
+                    
+                    // Add activity
+                    addActivity('Check-out berhasil', now.toLocaleTimeString('id-ID'), 'red');
+                    
+                    // Stop work timer
+                    if (workTimer) {
+                        clearInterval(workTimer);
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Check-out Berhasil!',
+                        text: `Terima kasih atas kerja keras Anda, ${currentUser.name}! Total kerja: ${workDuration}`,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function startWorkTimer() {
+            workTimer = setInterval(() => {
+                if (checkInTimestamp) {
+                    const now = new Date();
+                    const duration = calculateWorkDuration(checkInTimestamp, now);
+                    document.getElementById('workingHours').textContent = duration;
+                }
+            }, 60000);
+        }
+
+        function calculateWorkDuration(start, end) {
+            const diffMs = end - start;
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+        }
+
+        function addActivity(activity, time, color) {
+            const activityList = document.getElementById('activityList');
+            
+            if (activityList.children.length === 1 && activityList.children[0].textContent.includes('Belum ada aktivitas')) {
+                activityList.innerHTML = '';
+            }
+            
+            const activityItem = document.createElement('div');
+            activityItem.className = 'flex items-center p-3 bg-gray-50 rounded-lg';
+            activityItem.innerHTML = `
+                <div class="w-2 h-2 bg-${color}-500 rounded-full mr-3"></div>
+                <div class="flex-1">
+                    <div class="text-sm font-medium text-gray-800">${activity}</div>
+                    <div class="text-xs text-gray-500">${time} - ${currentUser.name}</div>
+                </div>
+            `;
+            
+            activityList.insertBefore(activityItem, activityList.firstChild);
+            
+            while (activityList.children.length > 5) {
+                activityList.removeChild(activityList.lastChild);
+            }
+        }
+
+        function viewHistory() {
+            Swal.fire({
+                title: '📋 Riwayat Absensi',
+                html: `
+                    <div class="text-left space-y-3">
+                        <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Hari ini</span>
+                                <span class="text-green-600 font-bold">${isCheckedIn ? 'Hadir' : 'Belum Absen'}</span>
+                            </div>
+                            <p class="text-sm text-gray-600">User: ${currentUser.name}</p>
+                            <p class="text-sm text-gray-600">Check-in: ${document.getElementById('checkInTime').textContent}</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Kemarin</span>
+                                <span class="text-blue-600 font-bold">Hadir</span>
+                            </div>
+                            <p class="text-sm text-gray-600">08:15 - 17:30 (8h 15m)</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+
+        function requestPermission() {
+            Swal.fire({
+                title: '📅 Pengajuan Izin',
+                html: `
+                    <div class="space-y-4">
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan</label>
+                            <input type="text" value="${currentUser.name}" class="w-full p-3 border rounded-lg bg-gray-100" readonly>
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Izin</label>
+                            <select id="permissionType" class="w-full p-3 border rounded-lg">
+                                <option value="">Pilih Jenis Izin</option>
+                                <option value="sick">Sakit</option>
+                                <option value="personal">Keperluan Pribadi</option>
+                                <option value="family">Keperluan Keluarga</option>
+                                <option value="emergency">Darurat</option>
+                            </select>
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alasan</label>
+                            <textarea id="permissionReason" placeholder="Jelaskan alasan izin..." class="w-full p-3 border rounded-lg h-20"></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '📤 Kirim Pengajuan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#f59e0b',
+                preConfirm: () => {
+                    const type = document.getElementById('permissionType').value;
+                    const reason = document.getElementById('permissionReason').value;
+                    
+                    if (!type || !reason.trim()) {
+                        Swal.showValidationMessage('Semua field harus diisi');
+                        return false;
+                    }
+                    
+                    return { type, reason };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Pengajuan Terkirim!',
+                        text: `Pengajuan izin dari ${currentUser.name} telah dikirim dan menunggu persetujuan`,
+                        confirmButtonColor: '#10b981'
+                    });
+                    
+                    addActivity('Pengajuan izin dikirim', new Date().toLocaleTimeString('id-ID'), 'yellow');
+                }
+            });
+        }
+
+        function viewReport() {
+            Swal.fire({
+                title: '📊 Laporan Kehadiran',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-800 mb-2">👤 ${currentUser.name}</h4>
+                            <p class="text-sm">Department: ${currentUser.department}</p>
+                            <p class="text-sm">Role: ${currentUser.role}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-green-800 mb-2">Bulan Ini</h4>
+                                <div class="space-y-1 text-sm">
+                                    <p>Hadir: <strong>18 hari</strong></p>
+                                    <p>Terlambat: <strong>2 hari</strong></p>
+                                    <p>Izin: <strong>1 hari</strong></p>
+                                    <p>Alpha: <strong>0 hari</strong></p>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-purple-800 mb-2">Jam Kerja</h4>
+                                <div class="space-y-1 text-sm">
+                                    <p>Total: <strong>144 jam</strong></p>
+                                    <p>Rata-rata: <strong>8h 12m</strong></p>
+                                    <p>Lembur: <strong>4 jam</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+
+        function logout() {
+            Swal.fire({
+                title: '🚪 Konfirmasi Logout',
+                text: `Apakah Anda yakin ingin keluar dari sistem, ${currentUser.name}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '✅ Ya, Keluar',
+                cancelButtonText: '❌ Batal',
+                confirmButtonColor: '#ef4444'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('currentUser');
+                    currentUser = null;
+                    isCheckedIn = false;
+                    checkInTimestamp = null;
+                    
+                    if (workTimer) {
+                        clearInterval(workTimer);
+                    }
+                    
+                    Swal.fire({
+                        title: '👋 Sampai Jumpa!',
+                        text: 'Anda telah berhasil logout dari sistem',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        showLogin();
+                    });
+                }
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a22fd9e1e0cdec',t:'MTc1NDM1MzgzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
