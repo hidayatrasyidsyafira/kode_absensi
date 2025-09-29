@@ -1,1186 +1,779 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi - Login & Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .login-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .login-form {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .v57-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-        }
-        .v57-button {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            transition: all 0.3s ease;
-        }
-        .v57-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-        .v57-header {
-            background: linear-gradient(90deg, #2196F3, #21CBF3);
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out;
-        }
-    </style>
-</head>
-<body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container flex items-center justify-center p-4">
-        <div class="login-form rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">SISTEM ABSENSI</h1>
-                <p class="text-gray-600">Digital Attendance System</p>
-            </div>
-
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan username">
-                </div>
-
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan password">
-                </div>
-
-                <button onclick="doLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
-                    🚀 LOGIN KE SISTEM
-                </button>
-            </div>
-
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-semibold text-gray-800 mb-3">📊 Google Spreadsheet Integration</h3>
-                
-                <div class="space-y-3">
-                    <!-- Connection Status -->
-                    <div id="connectionStatus" class="p-3 rounded-lg border-l-4">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium">Status Koneksi:</span>
-                            <span id="statusIndicator" class="text-sm">🔄 Checking...</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Configuration Info -->
-                    <div class="bg-blue-50 p-3 rounded-lg text-sm">
-                        <p class="font-medium text-blue-800 mb-2">⚙️ Konfigurasi Spreadsheet:</p>
-                        <p class="text-xs text-blue-700">• Sheet 'user_baru': tanggal, nama_lengkap, username, password, photo, email</p>
-                        <p class="text-xs text-blue-700">• Sistem akan otomatis memuat data user saat startup</p>
-                        <p class="text-xs text-blue-700">• Cache data berlaku 10 menit untuk performa optimal</p>
-                    </div>
-                    
-                    <!-- Demo Accounts -->
-                    <div class="bg-yellow-50 p-3 rounded-lg">
-                        <p class="font-medium text-yellow-800 mb-2">👤 Akun Demo (Fallback):</p>
-                        <div class="text-sm text-yellow-700 space-y-1">
-                            <p><strong>admin</strong> / admin123 (Administrator)</p>
-                            <p><strong>user</strong> / user123 (Employee)</p>
-                            <p><strong>karyawan</strong> / pass123 (Staff)</p>
-                            <p><strong>manager</strong> / manager123 (Manager)</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Setup Instructions -->
-                    <div class="bg-purple-50 p-3 rounded-lg text-xs">
-                        <p class="font-medium text-purple-800 mb-2">🔧 Setup Google Apps Script:</p>
-                        <p class="text-purple-700">1. Buka script.google.com → Buat project baru</p>
-                        <p class="text-purple-700">2. Ganti kode default dengan function doGet() yang diberikan</p>
-                        <p class="text-purple-700">3. Ganti 'YOUR_SPREADSHEET_ID' dengan ID spreadsheet Anda</p>
-                        <p class="text-purple-700">4. Deploy → New deployment → Web app</p>
-                        <p class="text-purple-700">5. Execute as: Me, Access: Anyone → Deploy</p>
-                        <p class="text-purple-700">6. Copy URL deployment ke SPREADSHEET_CONFIG.WEB_APP_URL</p>
-                        <p class="text-purple-700 mt-2 font-medium">⚠️ JANGAN gabungkan dengan kode HTML ini!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard Screen -->
-    <div id="dashboardScreen" class="hidden">
-        <!-- Header -->
-        <header class="v57-header text-white shadow-lg">
-            <div class="container mx-auto px-4 py-4">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-white/20 p-2 rounded-lg">
-                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold">SISTEM ABSENSI</h1>
-                            <p class="text-sm opacity-90">Dashboard Terintegrasi</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-lg font-semibold" id="currentDateTime">Loading...</div>
-                        <div class="text-sm opacity-90">Server Time</div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div class="bg-gray-100 min-h-screen">
-            <div class="container mx-auto px-4 py-8">
-                <!-- User Info Card -->
-                <div class="v57-card rounded-xl p-6 mb-8 text-white animate-fadeInUp">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-bold" id="employeeName">LOADING...</h2>
-                                <p class="opacity-90" id="employeeInfo">Loading user info...</p>
-                                <div class="flex items-center mt-2">
-                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                    <span class="text-sm" id="statusText">Ready for Check-in</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold" id="todayDate">--</div>
-                            <div class="text-sm opacity-90">Today</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main Actions -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <!-- Check In -->
-                    <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
-                        <div class="text-center">
-                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">CHECK IN</h3>
-                            <p class="text-gray-600 mb-4">Mulai aktivitas kerja hari ini</p>
-                            <div class="text-2xl font-bold text-gray-800 mb-4" id="checkInTime">--:--:--</div>
-                            <button onclick="performCheckIn()" id="checkInBtn" class="v57-button text-white px-8 py-3 rounded-lg font-semibold w-full">
-                                🕐 CHECK IN SEKARANG
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Check Out -->
-                    <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
-                        <div class="text-center">
-                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">CHECK OUT</h3>
-                            <p class="text-gray-600 mb-4">Akhiri aktivitas kerja hari ini</p>
-                            <div class="text-2xl font-bold text-gray-800 mb-4" id="checkOutTime">--:--:--</div>
-                            <button onclick="performCheckOut()" id="checkOutBtn" class="bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed" disabled>
-                                🕐 CHECK OUT
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Today Summary -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fadeInUp">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6">📊 RINGKASAN HARI INI</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="text-center p-4 bg-blue-50 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-600" id="workingHours">0h 0m</div>
-                            <div class="text-sm text-gray-600">Jam Kerja</div>
-                        </div>
-                        <div class="text-center p-4 bg-green-50 rounded-lg">
-                            <div class="text-2xl font-bold text-green-600" id="attendanceStatus">Belum Absen</div>
-                            <div class="text-sm text-gray-600">Status</div>
-                        </div>
-                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                            <div class="text-2xl font-bold text-yellow-600" id="breakTime">0m</div>
-                            <div class="text-sm text-gray-600">Istirahat</div>
-                        </div>
-                        <div class="text-center p-4 bg-purple-50 rounded-lg">
-                            <div class="text-2xl font-bold text-purple-600" id="overtime">0h</div>
-                            <div class="text-sm text-gray-600">Lembur</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Menu -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <button onclick="viewHistory()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
-                        <div class="text-center">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">Riwayat</div>
-                        </div>
-                    </button>
-
-                    <button onclick="requestPermission()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
-                        <div class="text-center">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">Izin</div>
-                        </div>
-                    </button>
-
-                    <button onclick="viewReport()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
-                        <div class="text-center">
-                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">Laporan</div>
-                        </div>
-                    </button>
-
-                    <button onclick="logout()" class="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all">
-                        <div class="text-center">
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">Keluar</div>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-xl shadow-lg p-6 animate-fadeInUp">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">📋 AKTIVITAS TERBARU</h3>
-                    <div id="activityList" class="space-y-3">
-                        <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
-                            <div class="flex-1">
-                                <div class="text-sm text-gray-600">Belum ada aktivitas hari ini</div>
-                                <div class="text-xs text-gray-400">Silakan lakukan check-in untuk memulai</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Global Variables
-        let currentUser = null;
-        let isCheckedIn = false;
-        let checkInTimestamp = null;
-        let workTimer = null;
-
-        // Google Spreadsheet Configuration
-        const SPREADSHEET_CONFIG = {
-            // URL Google Apps Script Web App Anda
-            WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxha5KdJdCiZMYJwAu4AaSSrb7Jb9UADQcByleFWOlp4wHHFqv2U77ViaqDKMheIWKW/exec',
-            
-            // Status koneksi
-            STATUS: 'CONNECTED'
-        };
-
-        // Cache untuk data user dari spreadsheet
-        let spreadsheetUsers = null;
-        let cacheExpiry = null;
-
-        // Demo accounts sebagai fallback
-        const DEMO_ACCOUNTS = {
-            'admin': {
-                password: 'admin123',
-                name: 'ADMIN SYSTEM',
-                email: 'admin@company.com',
-                department: 'IT',
-                role: 'Administrator',
-                employeeId: 'ADM001'
-            },
-            'user': {
-                password: 'user123',
-                name: 'USER DEMO',
-                email: 'user@company.com',
-                department: 'General',
-                role: 'Employee',
-                employeeId: 'USR001'
-            },
-            'karyawan': {
-                password: 'pass123',
-                name: 'KARYAWAN DEMO',
-                email: 'karyawan@company.com',
-                department: 'Operations',
-                role: 'Staff',
-                employeeId: 'KRY001'
-            },
-            'manager': {
-                password: 'manager123',
-                name: 'MANAGER DEMO',
-                email: 'manager@company.com',
-                department: 'Management',
-                role: 'Manager',
-                employeeId: 'MGR001'
-            }
-        };
-
-        // Initialize system when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('System initializing...');
-            checkLoginStatus();
-            
-            // Load users from spreadsheet and update status
-            loadUsersFromSpreadsheet().then(() => {
-                updateStatusAfterLoad();
-            }).catch(() => {
-                updateStatusAfterLoad();
-            });
-            
-            // Add Enter key support for login
-            document.getElementById('username').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    doLogin();
-                }
-            });
-            
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    doLogin();
-                }
-            });
-        });
-
-        // Load users from Google Spreadsheet
-        async function loadUsersFromSpreadsheet() {
-            try {
-                // Check cache first (valid for 10 minutes)
-                const now = new Date().getTime();
-                if (spreadsheetUsers && cacheExpiry && now < cacheExpiry) {
-                    console.log('✅ Using cached user data');
-                    return spreadsheetUsers;
-                }
-
-                console.log('🔄 Loading users from Google Spreadsheet...');
-                
-                // Show loading indicator
-                showLoadingToast('🔄 Memuat data user dari spreadsheet...');
-
-                const response = await fetch(SPREADSHEET_CONFIG.WEB_APP_URL, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const responseText = await response.text();
-                console.log('📄 Response received:', responseText.substring(0, 200) + '...');
-
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('❌ JSON parse error:', parseError);
-                    throw new Error('Invalid JSON response from Google Apps Script');
-                }
-
-                console.log('📊 Parsed data:', data);
-
-                // Process the data based on your spreadsheet structure
-                if (data && (data.success || Array.isArray(data) || data.users || data.data)) {
-                    let users = null;
-                    
-                    // Handle different response formats
-                    if (data.users) {
-                        users = data.users;
-                    } else if (data.data) {
-                        users = data.data;
-                    } else if (Array.isArray(data)) {
-                        users = data;
-                    } else if (data.success && data.result) {
-                        users = data.result;
-                    }
-
-                    if (users && Array.isArray(users) && users.length > 0) {
-                        // Convert array data to user object
-                        spreadsheetUsers = {};
-                        
-                        users.forEach((user, index) => {
-                            console.log(`👤 Processing user ${index}:`, user);
-                            
-                            let username, password, nama, email;
-                            
-                            if (Array.isArray(user)) {
-                                // If user is an array (row data)
-                                // Assuming structure: [tanggal, nama_lengkap, username, password, photo, email]
-                                username = user[2];
-                                password = user[3];
-                                nama = user[1];
-                                email = user[5];
-                            } else if (typeof user === 'object') {
-                                // If user is an object
-                                username = user.username || user.Username;
-                                password = user.password || user.Password;
-                                nama = user.nama_lengkap || user.nama || user.name || user.Name;
-                                email = user.email || user.Email || '';
-                            }
-                            
-                            if (username && password) {
-                                spreadsheetUsers[username] = {
-                                    password: password,
-                                    name: (nama || username).toString().toUpperCase(),
-                                    email: email || '',
-                                    department: 'General',
-                                    role: 'Employee',
-                                    employeeId: username.toString().toUpperCase(),
-                                    source: 'spreadsheet'
-                                };
-                            }
-                        });
-                        
-                        // Set cache expiry (10 minutes)
-                        cacheExpiry = now + (10 * 60 * 1000);
-                        
-                        hideLoadingToast();
-                        showSuccessToast(`✅ Berhasil memuat ${Object.keys(spreadsheetUsers).length} user dari spreadsheet`);
-                        
-                        console.log('✅ Users loaded from spreadsheet:', Object.keys(spreadsheetUsers));
-                        return spreadsheetUsers;
-                    } else {
-                        throw new Error('No valid users found in spreadsheet data');
-                    }
-                } else {
-                    throw new Error('Invalid data structure from Google Apps Script');
-                }
-
-            } catch (error) {
-                console.error('❌ Error loading users from spreadsheet:', error);
-                hideLoadingToast();
-                
-                // Show error notification
-                showWarningToast(`⚠️ Gagal memuat dari spreadsheet: ${error.message}`);
-                
-                // Use demo accounts as fallback
-                spreadsheetUsers = null;
-                console.log('📋 Using demo accounts as fallback');
-                
-                return null;
-            }
-        }
-
-        // Helper functions for toast notifications
-        function showLoadingToast(message) {
-            removeExistingToasts();
-            const toast = document.createElement('div');
-            toast.id = 'loadingToast';
-            toast.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
-            toast.innerHTML = `
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
-                ${message}
-            `;
-            document.body.appendChild(toast);
-        }
-
-        function showSuccessToast(message) {
-            removeExistingToasts();
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50';
-            toast.innerHTML = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
-
-        function showWarningToast(message) {
-            removeExistingToasts();
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-yellow-500 text-white px-4 py-3 rounded-lg shadow-lg z-50';
-            toast.innerHTML = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        }
-
-        function hideLoadingToast() {
-            const loadingToast = document.getElementById('loadingToast');
-            if (loadingToast) {
-                loadingToast.remove();
-            }
-        }
-
-        function removeExistingToasts() {
-            const existingToasts = document.querySelectorAll('.fixed.top-4.right-4');
-            existingToasts.forEach(toast => toast.remove());
-        }
-
-        // Update connection status on login screen
-        function updateConnectionStatus() {
-            const statusDiv = document.getElementById('connectionStatus');
-            const statusIndicator = document.getElementById('statusIndicator');
-            
-            if (!statusDiv || !statusIndicator) return;
-            
-            if (spreadsheetUsers && Object.keys(spreadsheetUsers).length > 0) {
-                // Connected to spreadsheet
-                statusDiv.className = 'p-3 rounded-lg border-l-4 border-green-400 bg-green-50';
-                statusIndicator.innerHTML = `✅ Terhubung (${Object.keys(spreadsheetUsers).length} users)`;
-            } else {
-                // Using demo accounts
-                statusDiv.className = 'p-3 rounded-lg border-l-4 border-yellow-400 bg-yellow-50';
-                statusIndicator.innerHTML = '⚠️ Menggunakan akun demo';
-            }
-        }
-
-        // Update status when data loads
-        function updateStatusAfterLoad() {
-            setTimeout(updateConnectionStatus, 1000);
-        }
-
-        // Enhanced login function with spreadsheet support
-        async function doLogin() {
-            console.log('doLogin function called');
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            console.log('Username:', username, 'Password length:', password.length);
-            
-            // Validate input
-            if (!username || !password) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Input Kosong!',
-                    text: 'Username dan password harus diisi!',
-                    confirmButtonColor: '#ef4444'
-                });
-                return;
-            }
-
-            // Show loading
-            Swal.fire({
-                title: '🔐 Memproses Login...',
-                text: 'Memeriksa kredensial...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            try {
-                // First, try to load fresh data from spreadsheet if needed
-                if (!spreadsheetUsers) {
-                    console.log('🔄 Loading users from spreadsheet for login...');
-                    await loadUsersFromSpreadsheet();
-                }
-
-                let userFound = false;
-                let userAccount = null;
-                let loginSource = '';
-
-                // Check spreadsheet users first (priority)
-                if (spreadsheetUsers && spreadsheetUsers[username] && spreadsheetUsers[username].password === password) {
-                    console.log('✅ Login successful with spreadsheet account');
-                    userAccount = spreadsheetUsers[username];
-                    loginSource = 'Google Spreadsheet';
-                    userFound = true;
-                } 
-                // Fallback to demo accounts
-                else if (DEMO_ACCOUNTS[username] && DEMO_ACCOUNTS[username].password === password) {
-                    console.log('✅ Login successful with demo account');
-                    userAccount = DEMO_ACCOUNTS[username];
-                    loginSource = 'Demo Account';
-                    userFound = true;
-                }
-
-                if (userFound && userAccount) {
-                    // Set current user
-                    currentUser = {
-                        username: username,
-                        ...userAccount,
-                        loginSource: loginSource,
-                        loginTime: new Date().toISOString()
-                    };
-                    
-                    // Save to localStorage
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    
-                    // Close loading and show success
-                    Swal.close();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Login Berhasil!',
-                        html: `
-                            <div class="text-center">
-                                <p class="mb-2">Selamat datang, <strong>${currentUser.name}</strong>!</p>
-                                <div class="text-sm text-gray-600">
-                                    <p>📊 Sumber: ${loginSource}</p>
-                                    <p>🕐 ${new Date().toLocaleString('id-ID')}</p>
-                                </div>
-                            </div>
-                        `,
-                        timer: 3000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        showDashboard();
-                    });
-                    
-                } else {
-                    console.log('❌ Login failed - invalid credentials');
-                    
-                    // Prepare available accounts list
-                    let availableAccounts = [];
-                    
-                    // Add spreadsheet accounts
-                    if (spreadsheetUsers && Object.keys(spreadsheetUsers).length > 0) {
-                        availableAccounts.push('<p class="font-semibold text-green-800 mb-2">📊 Akun dari Google Spreadsheet:</p>');
-                        Object.keys(spreadsheetUsers).forEach(user => {
-                            availableAccounts.push(`<p class="text-sm">• <strong>${user}</strong> (${spreadsheetUsers[user].name})</p>`);
-                        });
-                        availableAccounts.push('<br>');
-                    }
-                    
-                    // Add demo accounts
-                    availableAccounts.push('<p class="font-semibold text-blue-800 mb-2">👤 Akun Demo:</p>');
-                    Object.keys(DEMO_ACCOUNTS).forEach(user => {
-                        availableAccounts.push(`<p class="text-sm">• <strong>${user}</strong> / ${DEMO_ACCOUNTS[user].password}</p>`);
-                    });
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ Login Gagal!',
-                        html: `
-                            <div class="text-left">
-                                <p class="mb-4">Username atau password salah!</p>
-                                <div class="bg-gray-50 p-3 rounded-lg max-h-60 overflow-y-auto">
-                                    ${availableAccounts.join('')}
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <button onclick="refreshSpreadsheetData()" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
-                                        🔄 Refresh Data Spreadsheet
-                                    </button>
-                                </div>
-                            </div>
-                        `,
-                        confirmButtonColor: '#3b82f6',
-                        width: '500px'
-                    });
-                }
-
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Error Login!',
-                    html: `
-                        <div class="text-left">
-                            <p class="mb-4">Terjadi kesalahan saat login:</p>
-                            <div class="bg-red-50 p-3 rounded-lg text-sm">
-                                <p><strong>Error:</strong> ${error.message}</p>
-                            </div>
-                            <div class="mt-4 bg-blue-50 p-3 rounded-lg">
-                                <p class="font-semibold text-blue-800 mb-2">👤 Gunakan Akun Demo:</p>
-                                <div class="text-sm space-y-1">
-                                    <p><strong>admin</strong> / admin123</p>
-                                    <p><strong>user</strong> / user123</p>
-                                    <p><strong>karyawan</strong> / pass123</p>
-                                    <p><strong>manager</strong> / manager123</p>
-                                </div>
-                            </div>
-                        </div>
-                    `,
-                    confirmButtonColor: '#3b82f6'
-                });
-            }
-        }
-
-        // Function to refresh spreadsheet data
-        async function refreshSpreadsheetData() {
-            Swal.fire({
-                title: '🔄 Memuat Ulang Data...',
-                text: 'Mengambil data terbaru dari spreadsheet',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Clear cache to force reload
-            spreadsheetUsers = null;
-            cacheExpiry = null;
-
-            try {
-                await loadUsersFromSpreadsheet();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: '✅ Data Berhasil Dimuat!',
-                    text: spreadsheetUsers ? 
-                        `Berhasil memuat ${Object.keys(spreadsheetUsers).length} user dari spreadsheet` : 
-                        'Menggunakan akun demo sebagai fallback',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '⚠️ Gagal Memuat Data',
-                    text: 'Tidak dapat terhubung ke spreadsheet. Gunakan akun demo.',
-                    confirmButtonColor: '#f59e0b'
-                });
-            }
-        }
-
-        function checkLoginStatus() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            } else {
-                showLogin();
-            }
-        }
-
-        function showLogin() {
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('dashboardScreen').classList.add('hidden');
-        }
-
-        function showDashboard() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-            
-            // Initialize dashboard
-            initializeDashboard();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-            loadTodayData();
-        }
-
-        function initializeDashboard() {
-            document.getElementById('employeeName').textContent = currentUser.name;
-            document.getElementById('employeeInfo').textContent = `${currentUser.email} | ${currentUser.role} | ${currentUser.department}`;
-        }
-
-        function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options);
-            document.getElementById('todayDate').textContent = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-        }
-
-        function loadTodayData() {
-            const today = new Date().toDateString();
-            const savedData = localStorage.getItem(`attendance_${currentUser.username}_${today}`);
-            
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                if (data.checkIn) {
-                    isCheckedIn = true;
-                    checkInTimestamp = new Date(data.checkIn);
-                    document.getElementById('checkInTime').textContent = checkInTimestamp.toLocaleTimeString('id-ID');
-                    document.getElementById('attendanceStatus').textContent = 'Sudah Check-in';
-                    document.getElementById('statusText').textContent = 'Working - Ready for Check-out';
-                    
-                    // Enable check out button
-                    const checkOutBtn = document.getElementById('checkOutBtn');
-                    checkOutBtn.disabled = false;
-                    checkOutBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold w-full transition-all';
-                    
-                    // Disable check in button
-                    const checkInBtn = document.getElementById('checkInBtn');
-                    checkInBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
-                    checkInBtn.disabled = true;
-                    
-                    startWorkTimer();
-                }
-                
-                if (data.checkOut) {
-                    document.getElementById('checkOutTime').textContent = new Date(data.checkOut).toLocaleTimeString('id-ID');
-                    document.getElementById('attendanceStatus').textContent = 'Selesai';
-                    document.getElementById('statusText').textContent = 'Work Completed';
-                    
-                    document.getElementById('checkOutBtn').disabled = true;
-                    document.getElementById('checkOutBtn').className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
-                }
-            }
-        }
-
-        function performCheckIn() {
-            if (isCheckedIn) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Sudah Check-in',
-                    text: 'Anda sudah melakukan check-in hari ini',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
-
-            Swal.fire({
-                title: '🕐 Konfirmasi Check-in',
-                html: `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-blue-800 mb-2">Detail Check-in</h4>
-                            <p><strong>Waktu:</strong> ${new Date().toLocaleString('id-ID')}</p>
-                            <p><strong>Karyawan:</strong> ${currentUser.name}</p>
-                            <p><strong>Department:</strong> ${currentUser.department}</p>
-                            <p><strong>Status:</strong> ${new Date().getHours() <= 8 ? 'Tepat Waktu' : 'Terlambat'}</p>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: '✅ Konfirmasi Check-in',
-                cancelButtonText: '❌ Batal',
-                confirmButtonColor: '#10b981'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const now = new Date();
-                    isCheckedIn = true;
-                    checkInTimestamp = now;
-                    
-                    // Save to localStorage
-                    const today = now.toDateString();
-                    const attendanceData = {
-                        checkIn: now.toISOString(),
-                        employee: currentUser.name,
-                        username: currentUser.username,
-                        employeeId: currentUser.employeeId,
-                        department: currentUser.department
-                    };
-                    localStorage.setItem(`attendance_${currentUser.username}_${today}`, JSON.stringify(attendanceData));
-                    
-                    // Update UI
-                    document.getElementById('checkInTime').textContent = now.toLocaleTimeString('id-ID');
-                    document.getElementById('attendanceStatus').textContent = 'Sudah Check-in';
-                    document.getElementById('statusText').textContent = 'Working - Ready for Check-out';
-                    
-                    // Enable check out button
-                    const checkOutBtn = document.getElementById('checkOutBtn');
-                    checkOutBtn.disabled = false;
-                    checkOutBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold w-full transition-all';
-                    
-                    // Disable check in button
-                    const checkInBtn = document.getElementById('checkInBtn');
-                    checkInBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
-                    checkInBtn.disabled = true;
-                    
-                    // Add activity
-                    addActivity('Check-in berhasil', now.toLocaleTimeString('id-ID'), 'green');
-                    
-                    // Start work timer
-                    startWorkTimer();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Check-in Berhasil!',
-                        text: `Selamat bekerja, ${currentUser.name}! Check-in pada ${now.toLocaleTimeString('id-ID')}`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            });
-        }
-
-        function performCheckOut() {
-            if (!isCheckedIn) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Belum Check-in',
-                    text: 'Anda harus check-in terlebih dahulu',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
-
-            const now = new Date();
-            const workDuration = calculateWorkDuration(checkInTimestamp, now);
-
-            Swal.fire({
-                title: '🕐 Konfirmasi Check-out',
-                html: `
-                    <div class="text-left space-y-4">
-                        <div class="bg-red-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-red-800 mb-2">Detail Check-out</h4>
-                            <p><strong>Karyawan:</strong> ${currentUser.name}</p>
-                            <p><strong>Check-in:</strong> ${checkInTimestamp.toLocaleTimeString('id-ID')}</p>
-                            <p><strong>Check-out:</strong> ${now.toLocaleTimeString('id-ID')}</p>
-                            <p><strong>Total Kerja:</strong> ${workDuration}</p>
-                            <p><strong>Status:</strong> ${now.getHours() >= 17 ? 'Selesai' : 'Pulang Awal'}</p>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: '✅ Konfirmasi Check-out',
-                cancelButtonText: '❌ Batal',
-                confirmButtonColor: '#ef4444'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Update localStorage
-                    const today = now.toDateString();
-                    const existingData = JSON.parse(localStorage.getItem(`attendance_${currentUser.username}_${today}`) || '{}');
-                    existingData.checkOut = now.toISOString();
-                    localStorage.setItem(`attendance_${currentUser.username}_${today}`, JSON.stringify(existingData));
-                    
-                    // Update UI
-                    document.getElementById('checkOutTime').textContent = now.toLocaleTimeString('id-ID');
-                    document.getElementById('workingHours').textContent = workDuration;
-                    document.getElementById('attendanceStatus').textContent = 'Selesai';
-                    document.getElementById('statusText').textContent = 'Work Completed';
-                    
-                    // Disable check out button
-                    const checkOutBtn = document.getElementById('checkOutBtn');
-                    checkOutBtn.disabled = true;
-                    checkOutBtn.className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold w-full cursor-not-allowed';
-                    
-                    // Add activity
-                    addActivity('Check-out berhasil', now.toLocaleTimeString('id-ID'), 'red');
-                    
-                    // Stop work timer
-                    if (workTimer) {
-                        clearInterval(workTimer);
-                    }
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Check-out Berhasil!',
-                        text: `Terima kasih atas kerja keras Anda, ${currentUser.name}! Total kerja: ${workDuration}`,
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
-                }
-            });
-        }
-
-        function startWorkTimer() {
-            workTimer = setInterval(() => {
-                if (checkInTimestamp) {
-                    const now = new Date();
-                    const duration = calculateWorkDuration(checkInTimestamp, now);
-                    document.getElementById('workingHours').textContent = duration;
-                }
-            }, 60000);
-        }
-
-        function calculateWorkDuration(start, end) {
-            const diffMs = end - start;
-            const hours = Math.floor(diffMs / (1000 * 60 * 60));
-            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            return `${hours}h ${minutes}m`;
-        }
-
-        function addActivity(activity, time, color) {
-            const activityList = document.getElementById('activityList');
-            
-            if (activityList.children.length === 1 && activityList.children[0].textContent.includes('Belum ada aktivitas')) {
-                activityList.innerHTML = '';
-            }
-            
-            const activityItem = document.createElement('div');
-            activityItem.className = 'flex items-center p-3 bg-gray-50 rounded-lg';
-            activityItem.innerHTML = `
-                <div class="w-2 h-2 bg-${color}-500 rounded-full mr-3"></div>
-                <div class="flex-1">
-                    <div class="text-sm font-medium text-gray-800">${activity}</div>
-                    <div class="text-xs text-gray-500">${time} - ${currentUser.name}</div>
-                </div>
-            `;
-            
-            activityList.insertBefore(activityItem, activityList.firstChild);
-            
-            while (activityList.children.length > 5) {
-                activityList.removeChild(activityList.lastChild);
-            }
-        }
-
-        function viewHistory() {
-            Swal.fire({
-                title: '📋 Riwayat Absensi',
-                html: `
-                    <div class="text-left space-y-3">
-                        <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-500">
-                            <div class="flex justify-between">
-                                <span class="font-medium">Hari ini</span>
-                                <span class="text-green-600 font-bold">${isCheckedIn ? 'Hadir' : 'Belum Absen'}</span>
-                            </div>
-                            <p class="text-sm text-gray-600">User: ${currentUser.name}</p>
-                            <p class="text-sm text-gray-600">Check-in: ${document.getElementById('checkInTime').textContent}</p>
-                        </div>
-                        <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
-                            <div class="flex justify-between">
-                                <span class="font-medium">Kemarin</span>
-                                <span class="text-blue-600 font-bold">Hadir</span>
-                            </div>
-                            <p class="text-sm text-gray-600">08:15 - 17:30 (8h 15m)</p>
-                        </div>
-                    </div>
-                `,
-                confirmButtonText: 'Tutup',
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-
-        function requestPermission() {
-            Swal.fire({
-                title: '📅 Pengajuan Izin',
-                html: `
-                    <div class="space-y-4">
-                        <div class="text-left">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Karyawan</label>
-                            <input type="text" value="${currentUser.name}" class="w-full p-3 border rounded-lg bg-gray-100" readonly>
-                        </div>
-                        <div class="text-left">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Izin</label>
-                            <select id="permissionType" class="w-full p-3 border rounded-lg">
-                                <option value="">Pilih Jenis Izin</option>
-                                <option value="sick">Sakit</option>
-                                <option value="personal">Keperluan Pribadi</option>
-                                <option value="family">Keperluan Keluarga</option>
-                                <option value="emergency">Darurat</option>
-                            </select>
-                        </div>
-                        <div class="text-left">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Alasan</label>
-                            <textarea id="permissionReason" placeholder="Jelaskan alasan izin..." class="w-full p-3 border rounded-lg h-20"></textarea>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: '📤 Kirim Pengajuan',
-                cancelButtonText: 'Batal',
-                confirmButtonColor: '#f59e0b',
-                preConfirm: () => {
-                    const type = document.getElementById('permissionType').value;
-                    const reason = document.getElementById('permissionReason').value;
-                    
-                    if (!type || !reason.trim()) {
-                        Swal.showValidationMessage('Semua field harus diisi');
-                        return false;
-                    }
-                    
-                    return { type, reason };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '✅ Pengajuan Terkirim!',
-                        text: `Pengajuan izin dari ${currentUser.name} telah dikirim dan menunggu persetujuan`,
-                        confirmButtonColor: '#10b981'
-                    });
-                    
-                    addActivity('Pengajuan izin dikirim', new Date().toLocaleTimeString('id-ID'), 'yellow');
-                }
-            });
-        }
-
-        function viewReport() {
-            Swal.fire({
-                title: '📊 Laporan Kehadiran',
-                html: `
-                    <div class="text-left space-y-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-blue-800 mb-2">👤 ${currentUser.name}</h4>
-                            <p class="text-sm">Department: ${currentUser.department}</p>
-                            <p class="text-sm">Role: ${currentUser.role}</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-green-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-green-800 mb-2">Bulan Ini</h4>
-                                <div class="space-y-1 text-sm">
-                                    <p>Hadir: <strong>18 hari</strong></p>
-                                    <p>Terlambat: <strong>2 hari</strong></p>
-                                    <p>Izin: <strong>1 hari</strong></p>
-                                    <p>Alpha: <strong>0 hari</strong></p>
-                                </div>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-purple-800 mb-2">Jam Kerja</h4>
-                                <div class="space-y-1 text-sm">
-                                    <p>Total: <strong>144 jam</strong></p>
-                                    <p>Rata-rata: <strong>8h 12m</strong></p>
-                                    <p>Lembur: <strong>4 jam</strong></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                confirmButtonText: 'Tutup',
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-
-        function logout() {
-            Swal.fire({
-                title: '🚪 Konfirmasi Logout',
-                text: `Apakah Anda yakin ingin keluar dari sistem, ${currentUser.name}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '✅ Ya, Keluar',
-                cancelButtonText: '❌ Batal',
-                confirmButtonColor: '#ef4444'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.removeItem('currentUser');
-                    currentUser = null;
-                    isCheckedIn = false;
-                    checkInTimestamp = null;
-                    
-                    if (workTimer) {
-                        clearInterval(workTimer);
-                    }
-                    
-                    Swal.fire({
-                        title: '👋 Sampai Jumpa!',
-                        text: 'Anda telah berhasil logout dari sistem',
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        showLogin();
-                    });
-                }
-            });
-        }
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a22fd9e1e0cdec',t:'MTc1NDM1MzgzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+     <html lang="id">
+     <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+       <title>Scanner Absensi Wajah</title>
+       <script src="https://cdn.tailwindcss.com"></script>
+       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+       <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+       <style>
+         *, *:before, *:after {
+           box-sizing: border-box;
+         }
+         body {
+           overscroll-behavior: none;
+           font-size: 16px;
+         }
+         .card-5-fixed {
+           min-height: 230px;
+           max-height: 230px;
+         }
+         .card-6-fixed {
+           min-height: 108px;
+           max-height: 108px;
+         }
+         .left-column {
+           display: flex;
+           flex-direction: column;
+           gap: 12px;
+           width: 100%;
+         }
+         .card-5-8-row {
+           display: flex;
+           flex-direction: column;
+           gap: 12px;
+         }
+         .card-5-container, .card-8-container {
+           width: 100%;
+         }
+         .table-card {
+           width: 100%;
+           min-height: 350px;
+           align-self: start;
+         }
+         .table-cell-limited {
+           max-width: 100px;
+           overflow: hidden;
+           text-overflow: ellipsis;
+           white-space: nowrap;
+         }
+         .webcam-container {
+           position: relative;
+           width: 100%;
+           height: 200px;
+         }
+         #webcam {
+           width: 100%;
+           height: 100%;
+           object-fit: cover;
+           border-radius: 8px;
+         }
+         #face-guide {
+           position: absolute;
+           top: 10%;
+           left: 20%;
+           width: 60%;
+           height: 60%;
+           border: 2px dashed #4b5563;
+           border-radius: 8px;
+           pointer-events: none;
+           transition: border-color 0.3s;
+         }
+         #face-guide.detected {
+           border-color: #10b981;
+         }
+         #face-guide.recognized {
+           border-color: #3b82f6;
+         }
+         #webcam-error {
+           display: none;
+           color: red;
+           font-size: 14px;
+           text-align: center;
+         }
+         #face-message {
+           text-align: center;
+           font-size: 14px;
+           color: #4b5563;
+           margin-top: 5px;
+         }
+         #popup {
+           display: none;
+           position: fixed;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           width: 90%;
+           height: 80%;
+           max-height: 600px;
+           background: white;
+           border-radius: 12px;
+           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+           z-index: 1000;
+           padding: 20px;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           gap: 10px;
+         }
+         #popup-video {
+           width: 100%;
+           height: 100%;
+           object-fit: cover;
+           border-radius: 8px;
+         }
+         #popup .webcam-container {
+           height: 70%;
+         }
+         #popup-face-guide {
+           position: absolute;
+           top: 10%;
+           left: 20%;
+           width: 60%;
+           height: 60%;
+           border: 2px dashed #4b5563;
+           border-radius: 8px;
+           pointer-events: none;
+           transition: border-color 0.3s;
+         }
+         #popup-face-guide.detected {
+           border-color: #10b981;
+         }
+         #popup-face-guide.recognized {
+           border-color: #3b82f6;
+         }
+         #popup-error {
+           display: none;
+           color: red;
+           font-size: 14px;
+           text-align: center;
+         }
+         #popup-overlay {
+           display: none;
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: rgba(0, 0, 0, 0.5);
+           z-index: 999;
+         }
+         /* Responsivitas untuk Android */
+         @media (max-width: 768px) {
+           .grid-cols-12 {
+             grid-template-columns: 1fr;
+           }
+           .col-span-2 {
+             display: none; /* Sembunyikan sidebar di ponsel */
+           }
+           .col-span-10 {
+             width: 100%;
+             padding: 8px;
+           }
+           .grid-cols-5 {
+             grid-template-columns: 1fr;
+             gap: 8px;
+           }
+           .col-span-2, .col-span-1 {
+             width: 100%;
+           }
+           #digital-clock {
+             font-size: 1.5rem;
+           }
+           #rekapan-title {
+             font-size: 1rem;
+             text-align: center;
+           }
+           .table-card table {
+             font-size: 0.9rem;
+           }
+           .table-cell-limited {
+             max-width: 80px;
+           }
+           button {
+             font-size: 0.9rem;
+             padding: 8px;
+           }
+         }
+       </style>
+     </head>
+     <body class="bg-gray-100 font-sans">
+       <div class="grid grid-cols-12 h-screen">
+         <div class="col-span-2 bg-blue-800 text-white p-6 flex flex-col">
+           <div class="flex items-center mb-8">
+             <img src="https://via.placeholder.com/40" alt="Logo Sekolah" class="w-10 h-10 mr-3">
+             <h1 class="text-lg font-semibold">Nama Sekolah</h1>
+           </div>
+           <nav class="flex-1">
+             <ul class="space-y-4">
+               <li><a href="#" class="flex items-center space-x-2 text-white hover:text-blue-300"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+               <li><a href="#" class="flex items-center space-x-2 text-white hover:text-blue-300"><i class="fas fa-sign-in-alt"></i><span>Login</span></a></li>
+             </ul>
+           </nav>
+         </div>
+
+         <div class="col-span-10 p-6 flex flex-col h-full">
+           <div class="flex justify-between items-center mb-3">
+             <div class="relative w-full">
+               <input type="text" placeholder="Cari..." class="w-full p-2 pl-10 border rounded-lg">
+               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+             </div>
+             <div class="flex items-center space-x-4">
+               <button onclick="fetchAbsensiData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" id="refresh-btn">Refresh</button>
+               <i class="fas fa-user-circle text-3xl text-gray-600"></i>
+             </div>
+           </div>
+
+           <div class="flex justify-between items-center mb-3">
+             <button onclick="additionalAction()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Aksi Tambahan</button>
+             <h2 class="text-xl font-semibold text-right" id="rekapan-title">Rekapan Absensi hari Selasa, 30/09/2025</h2>
+           </div>
+
+           <div class="grid grid-cols-5 gap-3 mb-3">
+             <div class="col-span-2 bg-white p-5 rounded-lg shadow-md h-25 flex items-center overflow-hidden">
+               <div class="flex items-center space-x-4">
+                 <i class="fas fa-user text-4xl text-blue-600"></i>
+                 <div>
+                   <h2 class="text-lg font-semibold line-clamp-1">Selamat Datang</h2>
+                   <p class="text-base text-gray-600 line-clamp-1">Selamat datang di scanner absensi wajah.</p>
+                 </div>
+               </div>
+             </div>
+
+             <div class="col-span-1 bg-white p-5 rounded-lg shadow-md h-22 flex flex-col justify-center overflow-hidden">
+               <h2 class="text-lg font-semibold line-clamp-1" id="tingkatX-title">Ting X | ... Org</h2>
+               <div class="grid grid-cols-2 gap-1 text-sm text-gray-600" id="tingkatX-data">
+                 <p class="line-clamp-1">✅ Hadir: 0</p>
+                 <p class="line-clamp-1">📝 Izin: 0</p>
+                 <p class="line-clamp-1">😎 Bolos: 0</p>
+                 <p class="line-clamp-1">🤒 Sakit: 0</p>
+                 <p class="line-clamp-1">❌ Alfa: 0</p>
+               </div>
+             </div>
+
+             <div class="col-span-1 bg-white p-5 rounded-lg shadow-md h-22 flex flex-col justify-center overflow-hidden">
+               <h2 class="text-lg font-semibold line-clamp-1" id="tingkatXI-title">Ting XI | ... Org</h2>
+               <div class="grid grid-cols-2 gap-1 text-sm text-gray-600" id="tingkatXI-data">
+                 <p class="line-clamp-1">✅ Hadir: 0</p>
+                 <p class="line-clamp-1">📝 Izin: 0</p>
+                 <p class="line-clamp-1">❌ Alfa: 0</p>
+                 <p class="line-clamp-1">😎 Bolos: 0</p>
+                 <p class="line-clamp-1">🤒 Sakit: 0</p>
+               </div>
+             </div>
+
+             <div class="col-span-1 bg-white p-5 rounded-lg shadow-md h-22 flex flex-col justify-center overflow-hidden">
+               <h2 class="text-lg font-semibold line-clamp-1" id="tingkatXII-title">Ting XII | ... Org</h2>
+               <div class="grid grid-cols-2 gap-1 text-sm text-gray-600" id="tingkatXII-data">
+                 <p class="line-clamp-1">✅ Hadir: 0</p>
+                 <p class="line-clamp-1">📝 Izin: 0</p>
+                 <p class="line-clamp-1">❌ Alfa: 0</p>
+                 <p class="line-clamp-1">😎 Bolos: 0</p>
+                 <p class="line-clamp-1">🤒 Sakit: 0</p>
+               </div>
+             </div>
+           </div>
+
+           <div class="flex flex-row gap-3 flex-1">
+             <div class="left-column">
+               <div class="card-5-8-row">
+                 <div class="card-8-container">
+                   <div class="bg-white p-5 rounded-lg shadow-md card-5-fixed flex flex-col justify-center items-center overflow-hidden">
+                     <h2 class="text-lg font-semibold line-clamp-1 mb-2">Scanner Wajah</h2>
+                     <div class="webcam-container">
+                       <video id="webcam" autoplay playsinline></video>
+                       <div id="face-guide"></div>
+                     </div>
+                     <p id="face-message">Arahkan wajah ke kamera</p>
+                     <p id="webcam-error">Gagal memuat kamera</p>
+                     <button id="open-popup" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded-lg hover:bg-blue-700">Buka Scanner</button>
+                   </div>
+                 </div>
+                 <div class="card-5-container">
+                   <div class="bg-white p-1 rounded-lg shadow-md card-5-fixed flex flex-col items-center space-y-2 overflow-hidden">
+                     <img id="student-photo" src="https://img.icons8.com/color/96/user.png" alt="Foto Siswa" class="w-[100px] h-[120px] rounded-md mx-auto object-cover">
+                     <hr class="my-2 border-gray-300 w-full">
+                     <div class="space-y-1 w-full pl-4">
+                       <p class="text-sm font-semibold line-clamp-1" id="student-nisn">NISN: -</p>
+                       <p class="text-sm font-semibold line-clamp-1" id="student-name">Nama Lengkap: -</p>
+                       <p class="text-sm font-semibold line-clamp-1" id="student-class">Kelas: -</p>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               <div class="bg-white p-2 rounded-lg shadow-md card-6-fixed flex flex-row items-center gap-4 overflow-hidden">
+                 <div class="flex-1 text-center">
+                   <h2 class="text-lg font-semibold line-clamp-1">Jam Sekarang</h2>
+                   <p class="text-3xl font-bold text-gray-800" id="digital-clock">04:39:00</p>
+                 </div>
+                 <div class="flex-1 flex flex-col justify-center">
+                   <h2 class="text-lg font-semibold text-center mb-2">MASUK | PULANG</h2>
+                   <div class="grid grid-cols-2 gap-4 text-center" id="masuk-pulang-data">
+                     <div>
+                       <p class="text-sm text-gray-600">Masuk</p>
+                       <p class="text-xl font-bold text-blue-600" id="jam-masuk">-</p>
+                     </div>
+                     <div>
+                       <p class="text-sm text-gray-600">Pulang</p>
+                       <p class="text-xl font-bold text-green-600" id="jam-pulang">-</p>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             <div class="bg-white p-5 rounded-lg shadow-md table-card flex flex-col overflow-hidden">
+               <h2 class="text-lg font-semibold mb-3">Daftar Siswa</h2>
+               <div class="flex justify-between items-center mb-3">
+                 <div class="relative w-1/2">
+                   <input type="text" id="search-table" placeholder="Cari NISN, Nama, atau Kelas..." class="w-full p-2 pl-10 border rounded-lg">
+                   <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                 </div>
+                 <div class="flex items-center space-x-2">
+                   <label for="rows-per-page" class="text-sm">Tampilkan:</label>
+                   <select id="rows-per-page" class="border rounded-lg p-1">
+                     <option value="3" selected>3</option>
+                     <option value="5">5</option>
+                     <option value="10">10</option>
+                     <option value="20">20</option>
+                     <option value="30">30</option>
+                   </select>
+                 </div>
+               </div>
+               <div class="flex-1 overflow-y-auto">
+                 <div class="overflow-x-auto">
+                   <table class="w-full text-sm text-left text-gray-600">
+                     <thead class="bg-gray-100 sticky top-0">
+                       <tr>
+                         <th class="p-2">No</th>
+                         <th class="p-2 table-cell-limited">NISN</th>
+                         <th class="p-2 table-cell-limited">Nama</th>
+                         <th class="p-2 table-cell-limited">Kelas</th>
+                         <th class="p-2">Aksi</th>
+                       </tr>
+                     </thead>
+                     <tbody id="table-body">
+                       <tr><td colspan="5" class="p-2 text-center">Memuat data...</td></tr>
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+               <div class="flex justify-between items-center mt-3">
+                 <button id="prev-page" class="bg-gray-300 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-400 disabled:opacity-50" disabled>Previous</button>
+                 <span id="page-info" class="text-sm">Halaman 1 dari 1</span>
+                 <button id="next-page" class="bg-gray-300 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-400 disabled:opacity-50" disabled>Next</button>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <!-- Popup untuk Scanner -->
+         <div id="popup-overlay"></div>
+         <div id="popup">
+           <h2 class="text-xl font-semibold">Scanner Wajah</h2>
+           <div class="webcam-container">
+             <video id="popup-video" autoplay playsinline></video>
+             <div id="popup-face-guide"></div>
+           </div>
+           <p id="face-message">Arahkan wajah ke kamera</p>
+           <p id="popup-error">Gagal memuat kamera</p>
+           <button id="close-popup" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Tutup</button>
+         </div>
+       </div>
+
+       <script>
+         let stream = null;
+         let popupStream = null;
+         let siswaData = [];
+         let studentDatabase = [];
+         let filteredData = [];
+         let currentPage = 1;
+         let rowsPerPage = 3;
+         let faceMatcher = null;
+         let captureInterval = null;
+         const BASE_URL = 'https://script.google.com/macros/s/AKfycbzVF64Tj2YKrxABGX9lCdjbSG4ar4xueGXiT45hspbZjmZz2dSadE13RFNshE8-kES6nA/exec';
+
+         async function startWebcam(elementId) {
+           const videoElement = document.getElementById(elementId);
+           const errorElement = document.getElementById(elementId === 'webcam' ? 'webcam-error' : 'popup-error');
+           const messageElement = document.getElementById('face-message');
+           try {
+             const newStream = await navigator.mediaDevices.getUserMedia({
+               video: { 
+                 width: elementId === 'popup-video' ? 1280 : 640, 
+                 height: elementId === 'popup-video' ? 720 : 480,
+                 facingMode: 'user' // Kamera depan untuk scanner
+               }
+             });
+             videoElement.srcObject = newStream;
+             videoElement.style.display = 'block';
+             errorElement.style.display = 'none';
+             messageElement.textContent = 'Arahkan wajah ke kamera';
+             console.log(`${elementId} started with stream:`, newStream);
+             return newStream;
+           } catch (error) {
+             console.error(`Error accessing ${elementId}:`, error);
+             videoElement.style.display = 'none';
+             errorElement.style.display = 'block';
+             errorElement.textContent = `Gagal memuat kamera: ${error.message}`;
+             return null;
+           }
+         }
+
+         async function stopWebcam(streamToStop) {
+           if (streamToStop) {
+             streamToStop.getTracks().forEach(track => track.stop());
+             console.log('Webcam stream stopped');
+           }
+         }
+
+         async function loadFaceApiModels() {
+           try {
+             console.log('Loading face-api.js models...');
+             await Promise.all([
+               faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights'),
+               faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights'),
+               faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights')
+             ]);
+             console.log('Face-api.js models loaded:', faceapi.nets);
+           } catch (error) {
+             console.error('Error loading face-api.js models:', error);
+             document.getElementById('webcam-error').style.display = 'block';
+             document.getElementById('webcam-error').textContent = 'Gagal memuat model pengenalan wajah';
+           }
+         }
+
+         async function initializeFaceMatcher() {
+           console.time('initializeFaceMatcher');
+           const labeledDescriptors = [];
+           const maxPhotos = 10; // Optimasi untuk Android
+           let loadedCount = 0;
+           for (const student of studentDatabase) {
+             if (loadedCount >= maxPhotos) break;
+             try {
+               console.log(`Loading image for NISN ${student.nisn}: ${student.photo}`);
+               const img = await faceapi.fetchImage(student.photo);
+               const detection = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptor();
+               if (detection) {
+                 labeledDescriptors.push(
+                   new faceapi.LabeledFaceDescriptors(student.nisn, [detection.descriptor])
+                 );
+                 loadedCount++;
+                 console.log(`Descriptor created for NISN ${student.nisn}`);
+               } else {
+                 console.warn(`No face detected in image for NISN: ${student.nisn}`);
+               }
+             } catch (error) {
+               console.error(`Error loading image for NISN ${student.nisn}:`, error);
+             }
+           }
+           faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+           console.log(`Face matcher initialized with ${loadedCount} photos`);
+           console.timeEnd('initializeFaceMatcher');
+         }
+
+         async function captureFace(videoElementId) {
+           if (!faceMatcher) {
+             console.warn('Face matcher not initialized');
+             return;
+           }
+           const videoElement = document.getElementById(videoElementId);
+           const guideElement = document.getElementById(videoElementId === 'webcam' ? 'face-guide' : 'popup-face-guide');
+           const messageElement = document.getElementById('face-message');
+           console.time('captureFace');
+           try {
+             const detections = await faceapi
+               .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+               .withFaceLandmarks()
+               .withFaceDescriptor();
+             console.log('Detections:', detections);
+             if (detections) {
+               guideElement.classList.remove('recognized');
+               guideElement.classList.add('detected');
+               messageElement.textContent = 'Wajah terdeteksi, sedang memproses...';
+               const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
+               console.log('Best match:', bestMatch);
+               if (bestMatch.label !== 'unknown') {
+                 const student = studentDatabase.find(s => s.nisn === bestMatch.label);
+                 console.log('Found student:', student);
+                 if (student) {
+                   guideElement.classList.remove('detected');
+                   guideElement.classList.add('recognized');
+                   messageElement.textContent = `Wajah dikenali: ${student.name}`;
+                   document.getElementById('student-photo').src = student.photo;
+                   document.getElementById('student-nisn').textContent = `NISN: ${student.nisn}`;
+                   document.getElementById('student-name').textContent = `Nama Lengkap: ${student.name}`;
+                   document.getElementById('student-class').textContent = `Kelas: ${student.class}`;
+                   console.log('Card 5 updated:', student);
+
+                   const absenResponse = await fetch(`${BASE_URL}?action=simpan&nisn=${student.nisn}&t=${new Date().getTime()}`);
+                   const absenResult = await absenResponse.json();
+                   console.log('Absensi result:', absenResult);
+                   if (absenResult.success) {
+                     console.log('Absensi tersimpan:', absenResult);
+                     await fetchAbsensiData();
+                   } else {
+                     console.error('Gagal menyimpan absensi:', absenResult.message);
+                   }
+                 } else {
+                   console.warn('Student not found in studentDatabase:', bestMatch.label);
+                   guideElement.classList.remove('detected');
+                   messageElement.textContent = 'Wajah tidak dikenali';
+                   document.getElementById('student-photo').src = 'https://img.icons8.com/color/96/user.png';
+                   document.getElementById('student-nisn').textContent = 'NISN: Tidak dikenali';
+                   document.getElementById('student-name').textContent = 'Nama Lengkap: Tidak dikenali';
+                   document.getElementById('student-class').textContent = 'Kelas: Tidak dikenali';
+                 }
+               } else {
+                 console.log('No match found');
+                 guideElement.classList.remove('detected');
+                 messageElement.textContent = 'Wajah tidak dikenali';
+                 document.getElementById('student-photo').src = 'https://img.icons8.com/color/96/user.png';
+                 document.getElementById('student-nisn').textContent = 'NISN: Tidak dikenali';
+                 document.getElementById('student-name').textContent = 'Nama Lengkap: Tidak dikenali';
+                 document.getElementById('student-class').textContent = 'Kelas: Tidak dikenali';
+               }
+             } else {
+               console.log('No face detected in webcam');
+               guideElement.classList.remove('detected', 'recognized');
+               messageElement.textContent = 'Arahkan wajah ke kamera';
+             }
+           } catch (error) {
+             console.error('Error in face recognition:', error);
+             guideElement.classList.remove('detected', 'recognized');
+             messageElement.textContent = 'Error dalam pengenalan wajah';
+             document.getElementById(videoElementId === 'webcam' ? 'webcam-error' : 'popup-error').style.display = 'block';
+             document.getElementById(videoElementId === 'webcam' ? 'webcam-error' : 'popup-error').textContent = `Error pengenalan wajah: ${error.message}`;
+           } finally {
+             console.timeEnd('captureFace');
+           }
+         }
+
+         function openPopup() {
+           document.getElementById('popup').style.display = 'flex';
+           document.getElementById('popup-overlay').style.display = 'block';
+           stopWebcam(stream);
+           startWebcam('popup-video').then(newStream => {
+             popupStream = newStream;
+             captureInterval = setInterval(() => {
+               console.log('Running captureFace in popup at', new Date().toLocaleTimeString());
+               captureFace('popup-video');
+             }, 7000);
+           });
+         }
+
+         function closePopup() {
+           document.getElementById('popup').style.display = 'none';
+           document.getElementById('popup-overlay').style.display = 'none';
+           clearInterval(captureInterval);
+           stopWebcam(popupStream);
+           popupStream = null;
+           document.getElementById('face-message').textContent = 'Arahkan wajah ke kamera';
+           document.getElementById('popup-face-guide').classList.remove('detected', 'recognized');
+           startWebcam('webcam').then(newStream => {
+             stream = newStream;
+             captureInterval = setInterval(() => {
+               console.log('Running captureFace in main webcam at', new Date().toLocaleTimeString());
+               captureFace('webcam');
+             }, 7000);
+           });
+         }
+
+         function renderTable(data, page, rows) {
+           const start = (page - 1) * rows;
+           const end = start + rows;
+           const paginatedData = data.slice(start, end);
+           const tableBody = document.getElementById('table-body');
+           tableBody.innerHTML = '';
+
+           if (paginatedData.length === 0) {
+             tableBody.innerHTML = '<tr><td colspan="5" class="p-2 text-center">Tidak ada data ditemukan</td></tr>';
+           } else {
+             paginatedData.forEach((item, index) => {
+               const row = document.createElement('tr');
+               row.innerHTML = `
+                 <td class="p-2">${start + index + 1}</td>
+                 <td class="p-2 table-cell-limited">${item.nisn}</td>
+                 <td class="p-2 table-cell-limited">${item.nama}</td>
+                 <td class="p-2 table-cell-limited">${item.kelas}</td>
+                 <td class="p-2">
+                   <button onclick="viewDetail('${item.nisn}')" class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-xs">Lihat Detail</button>
+                 </td>
+               `;
+               tableBody.appendChild(row);
+             });
+           }
+
+           const totalPages = Math.ceil(data.length / rows);
+           document.getElementById('page-info').textContent = `Halaman ${page} dari ${totalPages || 1}`;
+           document.getElementById('prev-page').disabled = page === 1;
+           document.getElementById('next-page').disabled = page === totalPages || totalPages === 0;
+         }
+
+         function searchTable() {
+           const searchValue = document.getElementById('search-table').value.toLowerCase();
+           filteredData = siswaData.filter(item =>
+             item.nisn.toLowerCase().includes(searchValue) ||
+             item.nama.toLowerCase().includes(searchValue) ||
+             item.kelas.toLowerCase().includes(searchValue)
+           );
+           currentPage = 1;
+           renderTable(filteredData, currentPage, rowsPerPage);
+         }
+
+         function updateRowsPerPage() {
+           rowsPerPage = parseInt(document.getElementById('rows-per-page').value);
+           currentPage = 1;
+           renderTable(filteredData, currentPage, rowsPerPage);
+         }
+
+         function viewDetail(nisn) {
+           alert(`Melihat detail untuk NISN: ${nisn}`);
+         }
+
+         function additionalAction() {
+           alert('Aksi tambahan dilakukan!');
+         }
+
+         document.getElementById('search-table').addEventListener('input', searchTable);
+         document.getElementById('rows-per-page').addEventListener('change', updateRowsPerPage);
+         document.getElementById('prev-page').addEventListener('click', () => {
+           if (currentPage > 1) {
+             currentPage--;
+             renderTable(filteredData, currentPage, rowsPerPage);
+           }
+         });
+         document.getElementById('next-page').addEventListener('click', () => {
+           const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+           if (currentPage < totalPages) {
+             currentPage++;
+             renderTable(filteredData, currentPage, rowsPerPage);
+           }
+         });
+
+         document.getElementById('open-popup').addEventListener('click', openPopup);
+         document.getElementById('close-popup').addEventListener('click', closePopup);
+
+         function formatDate(date) {
+           const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+           const dayName = days[date.getDay()];
+           const day = String(date.getDate()).padStart(2, '0');
+           const month = String(date.getMonth() + 1).padStart(2, '0');
+           const year = date.getFullYear();
+           return `${dayName}, ${day}/${month}/${year}`;
+         }
+
+         function updateClock() {
+           try {
+             const now = new Date();
+             const hours = String(now.getHours()).padStart(2, '0');
+             const minutes = String(now.getMinutes()).padStart(2, '0');
+             const seconds = String(now.getSeconds()).padStart(2, '0');
+             const clockElement = document.getElementById('digital-clock');
+             if (clockElement) {
+               clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+             } else {
+               console.error('Element #digital-clock not found');
+             }
+           } catch (error) {
+             console.error('Error in updateClock:', error);
+           }
+         }
+
+         async function fetchAbsensiData() {
+           const refreshBtn = document.getElementById('refresh-btn');
+           refreshBtn.textContent = 'Loading...';
+           refreshBtn.disabled = true;
+           console.time('fetchAbsensiData');
+
+           try {
+             const response = await fetch(`${BASE_URL}?action=getsiswawithfoto&t=${new Date().getTime()}`);
+             if (!response.ok) {
+               throw new Error(`HTTP error: ${response.status}`);
+             }
+             const data = await response.json();
+             console.log("Respons getsiswawithfoto:", JSON.stringify(data, null, 2));
+
+             if (!data.success) {
+               throw new Error(data.message || 'Respons server tidak valid');
+             }
+
+             siswaData = data.siswa;
+             filteredData = [...siswaData];
+             studentDatabase = siswaData.map(s => ({
+               nisn: s.nisn,
+               name: s.nama,
+               class: s.kelas,
+               photo: s.foto
+             }));
+             console.log('siswaData:', siswaData);
+             console.log('studentDatabase:', studentDatabase);
+
+             console.time('initializeFaceMatcher');
+             await initializeFaceMatcher();
+             console.timeEnd('initializeFaceMatcher');
+
+             const absensi = data.absensi;
+             document.getElementById('tingkatX-title').textContent = `Ting X | ${absensi["X"].total} Org`;
+             document.getElementById('tingkatX-data').innerHTML = `
+               <p class="line-clamp-1">✅ Hadir: ${absensi["X"].hadir}</p>
+               <p class="line-clamp-1">📝 Izin: ${absensi["X"].izin}</p>
+               <p class="line-clamp-1">😎 Bolos: ${absensi["X"].bolos}</p>
+               <p class="line-clamp-1">🤒 Sakit: ${absensi["X"].sakit}</p>
+               <p class="line-clamp-1">❌ Alfa: ${absensi["X"].alfa}</p>
+             `;
+
+             document.getElementById('tingkatXI-title').textContent = `Ting XI | ${absensi["XI"].total} Org`;
+             document.getElementById('tingkatXI-data').innerHTML = `
+               <p class="line-clamp-1">✅ Hadir: ${absensi["XI"].hadir}</p>
+               <p class="line-clamp-1">📝 Izin: ${absensi["XI"].izin}</p>
+               <p class="line-clamp-1">❌ Alfa: ${absensi["XI"].alfa}</p>
+               <p class="line-clamp-1">😎 Bolos: ${absensi["XI"].bolos}</p>
+               <p class="line-clamp-1">🤒 Sakit: ${absensi["XI"].sakit}</p>
+             `;
+
+             document.getElementById('tingkatXII-title').textContent = `Ting XII | ${absensi["XII"].total} Org`;
+             document.getElementById('tingkatXII-data').innerHTML = `
+               <p class="line-clamp-1">✅ Hadir: ${absensi["XII"].hadir}</p>
+               <p class="line-clamp-1">📝 Izin: ${absensi["XII"].izin}</p>
+               <p class="line-clamp-1">❌ Alfa: ${absensi["XII"].alfa}</p>
+               <p class="line-clamp-1">😎 Bolos: ${absensi["XII"].bolos}</p>
+               <p class="line-clamp-1">🤒 Sakit: ${absensi["XII"].sakit}</p>
+             `;
+
+             const jadwalHariIni = data.jadwalHariIni;
+             document.getElementById('jam-masuk').textContent = jadwalHariIni.masuk && jadwalHariIni.masuk !== "-" ? jadwalHariIni.masuk : "Tidak ada jadwal";
+             document.getElementById('jam-pulang').textContent = jadwalHariIni.pulang && jadwalHariIni.pulang !== "-" ? jadwalHariIni.pulang : "Tidak ada jadwal";
+
+             if (siswaData.length === 0) {
+               document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-2 text-center text-red-600">Data siswa tidak ditemukan</td></tr>`;
+             }
+             renderTable(filteredData, currentPage, rowsPerPage);
+
+           } catch (error) {
+             console.error('Error di fetchAbsensiData:', error);
+             alert(`Gagal memuat data: ${error.message}`);
+             document.getElementById('table-body').innerHTML = `<tr><td colspan="5" class="p-2 text-center text-red-600">Gagal memuat data: ${error.message}</td></tr>`;
+           } finally {
+             refreshBtn.textContent = 'Refresh';
+             refreshBtn.disabled = false;
+             console.timeEnd('fetchAbsensiData');
+           }
+         }
+
+         window.onload = async function() {
+           updateClock();
+           setInterval(updateClock, 1000);
+           document.getElementById('rekapan-title').textContent = `Rekapan Absensi hari ${formatDate(new Date())}`;
+           console.time('initialLoad');
+           try {
+             await loadFaceApiModels();
+             await fetchAbsensiData();
+             await startWebcam('webcam').then(newStream => {
+               stream = newStream;
+               captureInterval = setInterval(() => {
+                 console.log('Running captureFace in main webcam at', new Date().toLocaleTimeString());
+                 captureFace('webcam');
+               }, 7000);
+             });
+           } catch (error) {
+             console.error('Error in window.onload:', error);
+             alert(`Gagal memulai aplikasi: ${error.message}`);
+           } finally {
+             console.timeEnd('initialLoad');
+           }
+         };
+       </script>
+     </body>
+     </html>
